@@ -1,6 +1,6 @@
-# iPhone Reservation
+# iPhone Reservation Checker
 
-Small toy AWS Lambda function. It checks Apple Store inventory for availability of given models and sends an SMS (using Twilio) if available. 
+I wrote this to play with AWS Lambda. It's a function function that checks Apple Store inventory for availability of given models and sends an SMS (using Twilio) if available. 
 
 ### Inputs
 
