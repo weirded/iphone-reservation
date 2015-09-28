@@ -1,6 +1,10 @@
 # iPhone Reservation Checker
 
-I wrote this to play with AWS Lambda. It's a function function that checks Apple Store inventory for availability of given models and sends an SMS (using Twilio) if available. 
+I wrote this to play with AWS Lambda. It's a function that checks Apple Store inventory for availability of given models and sends an SMS (using Twilio) if available. 
+
+### Running it in Lambda
+
+Create the .jar with `mvn clean package`, then create a Lambda function by uploading the .jar (using the AWS Console or AWS CLI). In the inputs, provide your arguments (as per the template below).
 
 ### Inputs
 
