@@ -1,0 +1,16 @@
+{
+  "searchParameters": {
+    "desiredColors": ["Space Gray", "Silver"],
+    "desiredCarriers": ["AT&T"],
+    "desiredStates": ["California"],
+    "desiredModelNames": ["iPhone 6s Plus"],
+    "desiredCities": ["Palo Alto", "Santa Clara", "Berkeley", "Emeryville", "Los Gatos", "Santa Clara", "San Jose", "San Mateo", "San Francisco"],
+    "desiredCapacities": [64, 128]
+  },
+  "toPhone": "+14085555555",
+  "twilioConfiguration": {
+    "accountSid": "[fill]",
+    "authToken": "[fill]",
+    "fromPhone": "+14085555555"
+  }
+}
