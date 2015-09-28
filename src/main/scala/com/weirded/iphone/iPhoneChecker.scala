@@ -1,11 +1,7 @@
 package com.weirded.iphone
 
-import java.io.File
-
-import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.twilio.sdk.TwilioRestClient
-import org.apache.commons.io.{FileUtils, IOUtils}
+import org.apache.commons.io.IOUtils
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.message.BasicNameValuePair
@@ -13,7 +9,6 @@ import org.apache.http.util.EntityUtils
 import spray.json.{AdditionalFormats, JsObject, _}
 
 import scala.collection.JavaConversions._
-import scala.util.control.NonFatal
 
 case class iPhoneModel(modelNumber: String, model: String, capacityGb: Int, color: String, carrier: String)
 
@@ -41,10 +36,10 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val storeFormat = jsonFormat6(Store)
   implicit val storeListingFormat = jsonFormat2(StoreListing)
 }
-class iPhoneChecker(request: Request) extends Protocols with AdditionalFormats {
+
+class iPhoneChecker(request: Request, storeStore: StoreStore) extends Protocols with AdditionalFormats {
 
   val stores = retrieveStoreListing.stores
-  val s3 = new AmazonS3Client()
 
   request.searchParameters.desiredStates.foreach {
     state =>
@@ -94,33 +89,12 @@ class iPhoneChecker(request: Request) extends Protocols with AdditionalFormats {
 
   def check(): Unit = {
     val storesWithInventory = storesWithPhones
-    val newStores = storesWithInventory.diff(previousStoresWithInventory)
-    storePreviousStores(storesWithInventory)
+    val newStores = storesWithInventory.diff(storeStore.previousStoresWithInventory)
+    storeStore.storePreviousStores(storesWithInventory)
     if (newStores.nonEmpty) {
       val storeList = newStores.map(_.storeName).mkString(", ")
       sendSMS(s"iPhones now available in $storeList")
     }
-  }
-
-  private def previousStoresWithInventory: Set[Store] = {
-    val file = File.createTempFile("iphone", "json")
-    try {
-      s3.getObject(new GetObjectRequest("iphone-memory", "stores-with-inventory.json"), file)
-      val results = FileUtils.readFileToString(file).parseJson.convertTo[StoreListing].stores.toSet
-      println(s"Loaded ${results.size} stores from S3")
-      results
-    } catch {
-      case NonFatal(e) =>
-        e.printStackTrace()
-        Set.empty
-    }
-  }
-
-  private def storePreviousStores(stores: Set[Store]): Unit = {
-    val file = File.createTempFile("iphone", "json")
-    FileUtils.writeStringToFile(file, new StoreListing("nope", stores.toSeq).toJson.prettyPrint)
-    s3.putObject("iphone-memory", "stores-with-inventory.json", file)
-    println("Updated S3 with file.")
   }
 
   private def storesWithPhones: Set[Store] = {

@@ -9,7 +9,7 @@ import spray.json._
 class iPhoneCheckHandler extends RequestStreamHandler with Protocols {
   override def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
     val request = IOUtils.toString(inputStream).parseJson.convertTo[Request]
-    val checker = new iPhoneChecker(request)
+    val checker = new iPhoneChecker(request, new S3StoreStore)
     checker.check()
   }
 }
