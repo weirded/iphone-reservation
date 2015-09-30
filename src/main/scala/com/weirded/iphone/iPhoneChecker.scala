@@ -2,6 +2,7 @@ package com.weirded.iphone
 
 import com.twilio.sdk.TwilioRestClient
 import org.apache.commons.io.IOUtils
+import org.apache.commons.logging.LogFactory
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.message.BasicNameValuePair
@@ -40,6 +41,8 @@ trait Protocols extends DefaultJsonProtocol {
 class iPhoneChecker(request: Request, storeStore: StoreStore) extends Protocols with AdditionalFormats {
 
   val stores = retrieveStoreListing.stores
+
+  val log = LogFactory.getLog(getClass)
 
   request.searchParameters.desiredStates.foreach {
     state =>
@@ -113,7 +116,7 @@ class iPhoneChecker(request: Request, storeStore: StoreStore) extends Protocols 
       }.getOrElse(throw new IllegalArgumentException("Unknown store!"))
     }
 
-    println(s"Checking ${desiredStores.size} stores for ${desiredModels.size} models ...")
+    log.info(s"Checking ${desiredStores.size} stores for ${desiredModels.size} models ...")
     val storesWithInventory = desiredStores.map {
       store =>
         val availableModels = desiredModels.filter(m => available(store.storeNumber, m.modelNumber))
@@ -122,10 +125,10 @@ class iPhoneChecker(request: Request, storeStore: StoreStore) extends Protocols 
 
     storesWithInventory.toSeq.sortBy(s => s._1.storeCity + s._1.storeName).foreach {
       case (store, models) =>
-        println(s"${store.storeState} - ${store.storeCity} - ${store.storeName} ")
+        log.info(s"${store.storeState} - ${store.storeCity} - ${store.storeName} ")
         models.toSeq.sortBy(m => m.capacityGb + m.color).foreach {
           model =>
-            println(s"  ${model.model} ${model.capacityGb} GB color: ${model.color} carriers: ${model.carrier}")
+            log.info(s"  ${model.model} ${model.capacityGb} GB color: ${model.color} carriers: ${model.carrier}")
         }
     }
 
@@ -170,6 +173,6 @@ class iPhoneChecker(request: Request, storeStore: StoreStore) extends Protocols 
     )
     val messageFactory = twilio.getAccount.getMessageFactory
     val message = messageFactory.create(params)
-    println(s"Sent SMS: ${message.getSid}")
+    log.info(s"Sent SMS: ${message.getSid}")
   }
 }
